@@ -100,39 +100,31 @@ function runSearch() {
 
 function employeeSearch() {
   connection.query("SELECT employee.*, role.title, department_name FROM employee left join employee_role role on role.role_id = employee.role_id left join department on department.department_id = role.department_id", function(err, answer) {
-    console.log("\n Roles Retrieved from Database \n");
+    console.log("\n Employees Retrieved from Database \n");
     console.table(answer);
+    
   });
   runSearch();
-}
-
-
-function employeeSearch2() {
-  inquirer
-    .prompt({
-      name: "employee",
-      type: "input",
-    })
-    .then(function(answer) {
-      var query = "SELECT employee.*, role.title FROM employee left join employee_role role on role.role_id = employee.role_id ";
-      connection.query(query, { artist: answer.artist }, function(err, res) {
-        for (var i = 0; i < res.length; i++) {
-          console.log("Position: " + res[i].position + " || Song: " + res[i].song + " || Year: " + res[i].year);
-        }
-        runSearch();
-      });
-    });
-}
+};
 
 function departmentSearch() {
-  var query = "SELECT artist FROM top5000 GROUP BY artist HAVING count(*) > 1";
-  connection.query(query, function(err, res) {
-    for (var i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    runSearch();
+  connection.query("SELECT  department_name FROM department ", function(err, answer) {
+    console.log("\n Departments Retrieved from Database \n");
+    console.table(answer);
+    
   });
-}
+  runSearch();
+};
+
+function roleSearch() {
+  connection.query("SELECT  title, salary  FROM employee_role ", function(err, answer) {
+    console.log("\n Roles Retrieved from Database \n");
+    console.table(answer);
+    
+  });
+  runSearch();
+};
+
 
 function rangeSearch() {
   inquirer
