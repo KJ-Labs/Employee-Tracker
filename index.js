@@ -100,7 +100,7 @@ function runSearch() {
 
 function employeeSearch() {
   connection.query("SELECT employee.*, role.title, department_name FROM employee left join employee_role role on role.role_id = employee.role_id left join department on department.department_id = role.department_id", function(err, answer) {
-    console.log("\n Employees Retrieved from Database \n");
+    console.log("\n Employees Retrieved from Database, please use down arrow to return to questions.  \n");
     console.table(answer);
     
   });
@@ -109,7 +109,7 @@ function employeeSearch() {
 
 function departmentSearch() {
   connection.query("SELECT  department_name FROM department ", function(err, answer) {
-    console.log("\n Departments Retrieved from Database \n");
+    console.log("\n Departments Retrieved from Database, please use down arrow to return to questions.  \n");
     console.table(answer);
     
   });
@@ -118,66 +118,19 @@ function departmentSearch() {
 
 function roleSearch() {
   connection.query("SELECT  title, salary  FROM employee_role ", function(err, answer) {
-    console.log("\n Roles Retrieved from Database \n");
+    console.log("\n Roles Retrieved from Database, please use down arrow to return to questions. \n");
     console.table(answer);
     
   });
   runSearch();
 };
 
-
-function rangeSearch() {
-  inquirer
-    .prompt([
-      {
-        name: "start",
-        type: "input",
-        message: "Enter starting position: ",
-        validate: function(value) {
-          if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-        }
-      },
-      {
-        name: "end",
-        type: "input",
-        message: "Enter ending position: ",
-        validate: function(value) {
-          if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-        }
-      }
-    ])
-    .then(function(answer) {
-      var query = "SELECT position,song,artist,year FROM top5000 WHERE position BETWEEN ? AND ?";
-      connection.query(query, [answer.start, answer.end], function(err, res) {
-        for (var i = 0; i < res.length; i++) {
-          console.log(
-            "Position: " +
-              res[i].position +
-              " || Song: " +
-              res[i].song +
-              " || Artist: " +
-              res[i].artist +
-              " || Year: " +
-              res[i].year
-          );
-        }
-        runSearch();
-      });
-    });
-}
-
-function songSearch() {
+function addEmployee() {
   inquirer
     .prompt({
-      name: "song",
+      name: "first_name",
       type: "input",
-      message: "What song would you like to look for?"
+      message: "What is the firstname would you like to look for?"
     })
     .then(function(answer) {
       console.log(answer.song);
@@ -197,37 +150,97 @@ function songSearch() {
     });
 }
 
-function songAndAlbumSearch() {
+function addEmployee() {
   inquirer
-    .prompt({
-      name: "artist",
-      type: "input",
-      message: "What artist would you like to search for?"
-    })
+    .prompt([
+      {
+        type: "input",
+        message: "What's the first name of the employee?",
+        name: "first_name"
+      },
+      {
+        type: "input",
+        message: "What's the last name of the employee?",
+        name: "last_name"
+      },
+      {
+        type: "input",
+        message: "What is the employee's role id number?",
+        name: "role_id"
+      },
+      {
+        type: "input",
+        message: "What is the manager id number?",
+        name: "manager_id"
+      }
+    ])
     .then(function(answer) {
-      var query = "SELECT top_albums.year, top_albums.album, top_albums.position, top5000.song, top5000.artist ";
-      query += "FROM top_albums INNER JOIN top5000 ON (top_albums.artist = top5000.artist AND top_albums.year ";
-      query += "= top5000.year) WHERE (top_albums.artist = ? AND top5000.artist = ?) ORDER BY top_albums.year, top_albums.position";
 
-      connection.query(query, [answer.artist, answer.artist], function(err, res) {
-        console.log(res.length + " matches found!");
-        for (var i = 0; i < res.length; i++) {
-          console.log(
-            i+1 + ".) " +
-              "Year: " +
-              res[i].year +
-              " Album Position: " +
-              res[i].position +
-              " || Artist: " +
-              res[i].artist +
-              " || Song: " +
-              res[i].song +
-              " || Album: " +
-              res[i].album
-          );
-        }
-
+      
+      connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], function(err, res) {
+        if (err) throw err;
+        console.table(res);
         runSearch();
       });
     });
-}
+};
+
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What's the department name?",
+        name: "department_name"
+      },
+      {
+        type: "input",
+        message: "What's the department id?",
+        name: "department_id"
+      }
+    ])
+    .then(function(answer) {
+
+      
+      connection.query("INSERT INTO department (department_name, department_id) VALUES (?, ?)", [answer.department_name, answer.department_id ], function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        runSearch();
+      });
+    });
+};
+
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the title of the role?",
+        name: "title"
+      },
+      {
+        type: "input",
+        message: "What is the role id?",
+        name: "role_id"
+      },
+      {
+        type: "input",
+        message: "What is the salary?",
+        name: "salary"
+      },
+      {
+        type: "input",
+        message: "What is the deparment id number?",
+        name: "department_id"
+      }
+    ])
+    .then(function(answer) {
+
+      
+      connection.query("INSERT INTO employee_role (title, salary, role_id, department_id) VALUES (?, ?, ?, ?)", [answer.title, answer.salary, answer.role_id, answer.department_id], function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        runSearch();
+      });
+    });
+};
