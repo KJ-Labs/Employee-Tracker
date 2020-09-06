@@ -1,5 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const consoleTable = require("console.table");
+const promisemysql = require("promise-mysql");
+
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -43,38 +46,75 @@ function runSearch() {
     })
     .then(function(answer) {
       switch (answer.action) {
-      case "Find songs by artist":
-        artistSearch();
+      case "View All Employees":
+        employeeSearch();
         break;
 
-      case "Find all artists who appear more than once":
-        multiSearch();
+      case "View All Departments":
+        departmentSearch();
         break;
 
-      case "Find data within a specific range":
-        rangeSearch();
+      case "View All Roles":
+        roleSearch();
         break;
 
-      case "Search for a specific song":
-        songSearch();
+      case "Add an Employee":
+        addEmployee();
         break;
 
-      case "Find artists with a top song and top album in the same year":
-        songAndAlbumSearch();
-        break;
+      case "Add a Department":
+          addDepartment();
+          break;
+
+      case "Add a Role":
+          addRole();
+          break;
+
+      case "Update an Employee":
+            updateEmployee();
+            break;
+    
+      case "Update a Department":
+            updateDepartment();
+            break;
+    
+      case "Update a Role":
+            updateRole();
+            break;
+
+      case "Delete an Employee":
+            deleteEmployee();
+            break;
+        
+      case "Delete a Department":
+            deleteDepartment();
+            break;
+        
+      case "Add a Role":
+            delteRole();
+            break;
+ 
       }
     });
 }
 
-function artistSearch() {
+function employeeSearch() {
+  connection.query("SELECT employee.*, role.title, department_name FROM employee left join employee_role role on role.role_id = employee.role_id left join department on department.department_id = role.department_id", function(err, answer) {
+    console.log("\n Roles Retrieved from Database \n");
+    console.table(answer);
+  });
+  runSearch();
+}
+
+
+function employeeSearch2() {
   inquirer
     .prompt({
-      name: "artist",
+      name: "employee",
       type: "input",
-      message: "What artist would you like to search for?"
     })
     .then(function(answer) {
-      var query = "SELECT position, song, year FROM top5000 WHERE ?";
+      var query = "SELECT employee.*, role.title FROM employee left join employee_role role on role.role_id = employee.role_id ";
       connection.query(query, { artist: answer.artist }, function(err, res) {
         for (var i = 0; i < res.length; i++) {
           console.log("Position: " + res[i].position + " || Song: " + res[i].song + " || Year: " + res[i].year);
@@ -84,7 +124,7 @@ function artistSearch() {
     });
 }
 
-function multiSearch() {
+function departmentSearch() {
   var query = "SELECT artist FROM top5000 GROUP BY artist HAVING count(*) > 1";
   connection.query(query, function(err, res) {
     for (var i = 0; i < res.length; i++) {
