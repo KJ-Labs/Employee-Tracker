@@ -27,11 +27,11 @@ function askQuestions() {
         choices: [
             "1.) view all employees",
             "2.) view all departments",
-            "3.) add employee",
-            "4.) add department",
-            "5.) add role",
-            "6.) update employee role",
-            "7.) delete an employee",
+            "3.) view all roles",
+            "4.) add employee",
+            "5.) add department",
+            "6.) add role",
+            "7.) update employee role",
             "8.) QUIT"
         ],
         name: "choice"
@@ -46,26 +46,27 @@ function askQuestions() {
                 viewDepartments()
                 break;
 
-            case "3.) add employee":
+            case "3.) view all roles":
+                viewRoles()
+                break;
+
+            case "4.) add employee":
                 addEmployee()
                 break;
 
-            case "4.) add department":
+            case "5.) add department":
                 addDepartment()
                 break;
 
-            case "5.) add role":
+            case "6.) add role":
                 addRole()
                 break;
 
 
-            case "6.) update employee role":
+            case "7.) update employee role":
                 updateEmployeeRole();
                 break;
 
-            case "7.) delete an employee":
-                deleteEmployee();
-                break;
 
 
             default:
@@ -86,6 +87,14 @@ function viewEmployees() {
 //Queries all departments
 function viewDepartments() {
     connection.query("SELECT * FROM department", function (err, data) {
+        console.table(data);
+        askQuestions();
+    })
+}
+
+//Queries all roles
+function viewRoles() {
+    connection.query("SELECT * FROM employee_role", function (err, data) {
         console.table(data);
         askQuestions();
     })
@@ -122,19 +131,27 @@ function addEmployee() {
     })
 }
 
-//Add a new department
+//Ad a department
 function addDepartment() {
-    inquirer.prompt([{
-        type: "input",
-        name: "department",
-        message: "What is the department that you want to add?"
-    }, ]).then(function(res) {
-        connection.query('INSERT INTO department (name) VALUES (?)', [res.department], function(err, data) {
+    inquirer.prompt([
+        {
+            message: "enter department name",
+            type: "input",
+            name: "name"
+        },  {
+            message: "enter department ID:",
+            type: "number",
+            name: "department_id"
+        }
+    ]).then(function (response) {
+        connection.query("INSERT INTO department (department_name,  department_id) values (?, ?)", [response.name,  response.department_id], function (err, data) {
+            console.table(data);
             if (err) throw err;
-            console.table("Successfully Inserted");
-            askQuestions();
+     
         })
+        askQuestions();
     })
+
 }
 
 
@@ -153,10 +170,16 @@ function addRole() {
             message: "enter department ID:",
             type: "number",
             name: "department_id"
+        },
+        {
+            message: "enter role ID:",
+            type: "number",
+            name: "role_id"
         }
     ]).then(function (response) {
-        connection.query("INSERT INTO roles (title, salary, department_id) values (?, ?, ?)", [response.title, response.salary, response.department_id], function (err, data) {
+        connection.query("INSERT INTO employee_role (title, salary, department_id,  role_id) values (?, ?, ?, ?)", [response.title, response.salary, response.department_id, response.role_id], function (err, data) {
             console.table(data);
+            if (err) throw err;
      
         })
         askQuestions();
@@ -185,6 +208,7 @@ function updateEmployeeRole() {
     ]).then(function (response) {
         connection.query("UPDATE employee SET role_id = ? WHERE first_name = ? and last_name = ?", [response.role_id, response.name, response.last_name], function (err, data) {
             console.table(data);
+            if (err) throw err;
       
         })
         askQuestions();
@@ -192,29 +216,3 @@ function updateEmployeeRole() {
 
 }
 
-//Delete an employee
-function deleteEmployee() {
-  inquirer.prompt([
-      {
-          message: "What is the first name of the employee you would like to delete? ",
-          type: "input",
-          name: "name"
-      }, {
-          message: "What is the employee's last name?",
-          type: "input",
-          name: "last_name"
-      },  
-        {
-            message: "What is their employee ID:",
-            type: "number",
-            name: "empl_id"
-        }
-  ]).then(function (response) {
-      connection.query("Delete from employee WHERE first_name = ? AND last_name = ? AND employee_id = ? ", [response.name, response.last_name], response.empl_id, function (err, data) {
-          console.table(data);
-         
-      })
-      askQuestions();
-  })
-
-}
